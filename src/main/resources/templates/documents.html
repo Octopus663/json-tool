@@ -97,7 +97,16 @@
         </tbody>
     </table>
 
-    <a th:href="@{/documents/new}" class="button">Створити новий документ</a>
+    <div class="container">
+        <h1>Мої JSON документи</h1>
+
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 1.5rem;">
+            <a th:href="@{/documents/new}" class="button">Створити новий документ</a>
+
+            <a th:href="@{/documents/undo}" class="button button-secondary"
+               style="background-color: #6c757d;">Скасувати останнє</a>
+        </div>
+    </div>
 </div>
 </body>
 </html>
