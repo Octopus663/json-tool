@@ -1,5 +1,6 @@
 package com.example.jsontool.controller;
 
+import com.example.jsontool.command.Command;
 import com.example.jsontool.model.JSONDocument;
 import com.example.jsontool.service.DocumentService;
 import com.example.jsontool.service.ValidationService;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import java.util.Map;
+import com.example.jsontool.command.CommandManager;
+import com.example.jsontool.command.CreateDocumentCommand;
+
 
 @Controller
 @RequestMapping("/documents")
@@ -26,7 +30,9 @@ public class DocumentController {
     @Autowired
     private ValidationService validationService;
 
-    // ... (ваш старий код listDocuments, showCreateForm, saveDocument залишається тут) ...
+    @Autowired
+    private CommandManager commandManager;
+
     @GetMapping
     public String listDocuments(Model model) {
         model.addAttribute("documents", documentService.findAll());
@@ -41,8 +47,12 @@ public class DocumentController {
 
     @PostMapping("/save")
     public String saveDocument(JSONDocument document) {
-        documentService.save(document);
-        return "redirect:/documents";
+        Command createCommand = new CreateDocumentCommand(documentService, document);
+
+        // 3. І доручаємо "Виконавцю" (Invoker) її виконати
+        commandManager.executeCommand(createCommand);
+
+        return "redirect:/documents"; // Повернення на список після збереження
     }
 
     @PostMapping("/validate")
@@ -58,5 +68,11 @@ public class DocumentController {
             errors = validationService.executeValidation(new SchemaValidation(), jsonText, schemaText);
         }
         return Map.of("errors", errors);
+    }
+
+    @GetMapping("/undo")
+    public String undoSave() {
+        commandManager.undoLastCommand();
+        return "redirect:/documents";
     }
 }

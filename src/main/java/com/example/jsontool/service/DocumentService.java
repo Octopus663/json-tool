@@ -22,4 +22,8 @@ public class DocumentService {
         }
         documentRepository.save(document);
     }
+
+    public void delete(JSONDocument document) {
+        documentRepository.delete(document);
+    }
 }
