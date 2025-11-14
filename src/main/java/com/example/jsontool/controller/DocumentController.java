@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import com.example.jsontool.command.CommandManager;
 import com.example.jsontool.command.CreateDocumentCommand;
-
+import com.example.jsontool.service.JsonEditorService;
 
 @Controller
 @RequestMapping("/documents")
@@ -29,6 +29,9 @@ public class DocumentController {
 
     @Autowired
     private ValidationService validationService;
+
+    @Autowired
+    private JsonEditorService jsonEditorService;
 
     @Autowired
     private CommandManager commandManager;
@@ -55,11 +58,19 @@ public class DocumentController {
         return "redirect:/documents"; // Повернення на список після збереження
     }
 
+    @GetMapping("/undo")
+    public String undoSave() {
+        commandManager.undoLastCommand();
+        return "redirect:/documents";
+    }
+
     @PostMapping("/validate")
     @ResponseBody
     public Map<String, List<String>> validateDocument(
             @RequestParam("jsonText") String jsonText,
             @RequestParam("schemaText") String schemaText) {
+
+        jsonEditorService.setTextContents(jsonText, schemaText);
 
         List<String> errors;
         if (schemaText == null || schemaText.trim().isEmpty()) {
@@ -67,12 +78,7 @@ public class DocumentController {
         } else {
             errors = validationService.executeValidation(new SchemaValidation(), jsonText, schemaText);
         }
-        return Map.of("errors", errors);
-    }
 
-    @GetMapping("/undo")
-    public String undoSave() {
-        commandManager.undoLastCommand();
-        return "redirect:/documents";
+        return Map.of("errors", errors);
     }
 }
