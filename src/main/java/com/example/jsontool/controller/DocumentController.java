@@ -19,6 +19,12 @@ import java.util.Map;
 import com.example.jsontool.command.CommandManager;
 import com.example.jsontool.command.CreateDocumentCommand;
 import com.example.jsontool.service.JsonEditorService;
+import com.example.jsontool.template.MarkdownExporter;
+import com.example.jsontool.template.TxtExporter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 @RequestMapping("/documents")
@@ -35,6 +41,12 @@ public class DocumentController {
 
     @Autowired
     private CommandManager commandManager;
+
+    @Autowired
+    private MarkdownExporter markdownExporter;
+
+    @Autowired
+    private TxtExporter txtExporter;
 
     @GetMapping
     public String listDocuments(Model model) {
@@ -81,4 +93,35 @@ public class DocumentController {
 
         return Map.of("errors", errors);
     }
+
+    @GetMapping("/{id}/export/markdown")
+    public ResponseEntity<String> exportToMarkdown(@PathVariable Long id) {
+        JSONDocument document = documentService.findAll().stream()
+                .filter(d -> d.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid document Id:" + id));
+
+        String markdownContent = markdownExporter.exportDocument(document);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + ".md\"")
+                .contentType(MediaType.TEXT_MARKDOWN)
+                .body(markdownContent);
+    }
+
+    @GetMapping("/{id}/export/txt")
+    public ResponseEntity<String> exportToTxt(@PathVariable Long id) {
+        JSONDocument document = documentService.findAll().stream()
+                .filter(d -> d.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid document Id:" + id));
+
+        String txtContent = txtExporter.exportDocument(document);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + ".txt\"")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(txtContent);
+    }
+
 }
