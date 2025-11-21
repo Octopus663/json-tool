@@ -104,6 +104,12 @@
                     [TXT]
                 </a>
             </td>
+            <td>
+                <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}"
+                   style="font-weight: 500; color: #007bff; text-decoration: none;">
+                    Test.json
+                </a>
+            </td>
 
 
         </tr>
