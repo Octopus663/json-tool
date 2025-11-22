@@ -86,6 +86,7 @@
             <th>ID</th>
             <th>Назва документа</th>
             <th>Дата Створення</th>
+            <th>Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -93,6 +94,24 @@
             <td th:text="${doc.id}">1</td>
             <td th:text="${doc.name}" style="font-weight: 500;">Test.json</td>
             <td th:text="${#temporals.format(doc.createdAt, 'dd.MM.yyyy HH:mm')}">25.10.2025 10:30</td>
+            <td>
+                <a th:href="@{/documents/{id}/export/markdown(id=${doc.id})}"
+                   style="margin-right: 5px; text-decoration: none; color: #007bff;">
+                    [MD]
+                </a>
+                <a th:href="@{/documents/{id}/export/txt(id=${doc.id})}"
+                   style="text-decoration: none; color: #28a745;">
+                    [TXT]
+                </a>
+            </td>
+            <td>
+                <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}"
+                   style="font-weight: 500; color: #007bff; text-decoration: none;">
+                    Test.json
+                </a>
+            </td>
+
+
         </tr>
         </tbody>
     </table>
