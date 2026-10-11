@@ -1,8 +1,8 @@
 package com.example.jsontool.flyweight;
 
 public class JsonToken {
-    private String content;
-    private JsonStyle style;
+    private final String content;
+    private final JsonStyle style;
 
     public JsonToken(String content, String tokenType) {
         this.content = content;

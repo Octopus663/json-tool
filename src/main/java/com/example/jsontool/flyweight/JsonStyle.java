@@ -1,6 +1,10 @@
 package com.example.jsontool.flyweight;
 
+import org.springframework.web.util.HtmlUtils;
 
+/**
+ * Flyweight: незмінний (intrinsic) стан стилю, спільний для всіх токенів одного типу.
+ */
 public class JsonStyle {
     private final String colorHex;
     private final String fontStyle;
@@ -12,9 +16,12 @@ public class JsonStyle {
         this.description = description;
     }
 
+    /**
+     * Обгортає текст у span зі стилем. Текст екранується, щоб уникнути XSS.
+     */
     public String applyStyle(String text) {
         return String.format("<span style='color:%s; font-weight:%s' title='%s'>%s</span>",
-                colorHex, fontStyle, description, text);
+                colorHex, fontStyle, HtmlUtils.htmlEscape(description), HtmlUtils.htmlEscape(text));
     }
 
     public String getColorHex() {
