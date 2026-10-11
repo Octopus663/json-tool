@@ -11,10 +11,25 @@ public class JSONDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     @Lob
     private String content;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime modifiedAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @PreUpdate
+    void onUpdate() {
+        this.modifiedAt = LocalDateTime.now();
+    }
 
     public Long getId() {
         return id;
@@ -64,13 +79,6 @@ public class JSONDocument {
         this.user = user;
     }
 
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    private LocalDateTime modifiedAt = LocalDateTime.now();
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 
     public JSONDocument() {}
 
@@ -81,4 +89,3 @@ public class JSONDocument {
     }
 
 }
-

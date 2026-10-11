@@ -2,10 +2,8 @@ package com.example.jsontool.observer;
 
 import com.example.jsontool.service.JsonEditorService;
 import com.example.jsontool.service.ValidationService;
-import com.example.jsontool.validation.SchemaValidation;
-import com.example.jsontool.validation.SyntaxValidation;
-import com.example.jsontool.validation.Validation;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,26 +11,23 @@ import java.util.List;
 @Component
 public class RealTimeValidationObserver implements Observer {
 
-    @Autowired
-    private ValidationService validationService;
+    private static final Logger log = LoggerFactory.getLogger(RealTimeValidationObserver.class);
+
+    private final ValidationService validationService;
+
+    public RealTimeValidationObserver(ValidationService validationService) {
+        this.validationService = validationService;
+    }
 
     @Override
     public void update(Subject subject) {
-        if (subject instanceof JsonEditorService) {
-            JsonEditorService editor = (JsonEditorService) subject;
-            String json = editor.getJsonContent();
-            String schema = editor.getSchemaContent();
-
-            Validation strategy = (schema == null || schema.trim().isEmpty())
-                    ? new SyntaxValidation()
-                    : new SchemaValidation();
-
-            List<String> errors = validationService.executeValidation(strategy, json, schema);
+        if (subject instanceof JsonEditorService editor) {
+            List<String> errors = validationService.validate(editor.getJsonContent(), editor.getSchemaContent());
 
             if (errors.isEmpty()) {
-                System.out.println("[ValidationObserver]: Текст оновлено. Валідація успішна.");
+                log.info("[ValidationObserver]: Текст оновлено. Валідація успішна.");
             } else {
-                System.out.println("[ValidationObserver]: Текст оновлено. Знайдено помилки: " + errors);
+                log.info("[ValidationObserver]: Текст оновлено. Знайдено помилки: {}", errors);
             }
         }
     }

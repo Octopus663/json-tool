@@ -2,34 +2,34 @@ package com.example.jsontool.service;
 
 import com.example.jsontool.observer.Observer;
 import com.example.jsontool.observer.Subject;
-import jakarta.annotation.PostConstruct; // <-- НОВИЙ ІМПОРТ
-import org.springframework.beans.factory.annotation.Autowired; // <-- НОВИЙ ІМПОРТ
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Subject патерну Observer. Бін — singleton, тому зміна стану та сповіщення
+ * виконуються атомарно (synchronized), щоб спостерігачі бачили узгоджений стан.
+ */
 @Service
 public class JsonEditorService implements Subject {
 
-    // Список підписників (спостерігачів)
-    private final List<Observer> observers = new ArrayList<>();
+    private static final Logger log = LoggerFactory.getLogger(JsonEditorService.class);
 
-    @Autowired
-    private List<Observer> allRegisteredObservers;
-
-    @PostConstruct
-    public void registerObservers() {
-        System.out.println("--- [Observer Pattern] Реєстрація спостерігачів... ---");
-        for (Observer observer : allRegisteredObservers) {
-            this.addObserver(observer);
-            System.out.println("Зареєстровано: " + observer.getClass().getSimpleName());
-        }
-        System.out.println("--- Реєстрацію завершено ---");
-    }
+    private final List<Observer> observers = new CopyOnWriteArrayList<>();
 
     private String jsonContent;
     private String schemaContent;
+
+    public JsonEditorService(List<Observer> registeredObservers) {
+        log.info("[Observer Pattern] Реєстрація спостерігачів...");
+        for (Observer observer : registeredObservers) {
+            addObserver(observer);
+            log.info("Зареєстровано: {}", observer.getClass().getSimpleName());
+        }
+    }
 
     @Override
     public void addObserver(Observer observer) {
@@ -43,25 +43,24 @@ public class JsonEditorService implements Subject {
 
     @Override
     public void notifyObservers() {
-        System.out.println("--- [Subject] Стан змінився! Сповіщую " + observers.size() + " спостерігачів... ---");
+        log.debug("[Subject] Стан змінився! Сповіщую {} спостерігачів...", observers.size());
         for (Observer observer : observers) {
             observer.update(this);
         }
     }
 
-    public void setTextContents(String jsonContent, String schemaContent) {
+    public synchronized void setTextContents(String jsonContent, String schemaContent) {
         this.jsonContent = jsonContent;
         this.schemaContent = schemaContent;
 
         notifyObservers();
     }
 
-    // Геттери, щоб спостерігачі могли отримати новий стан
-    public String getJsonContent() {
+    public synchronized String getJsonContent() {
         return jsonContent;
     }
 
-    public String getSchemaContent() {
+    public synchronized String getSchemaContent() {
         return schemaContent;
     }
 }

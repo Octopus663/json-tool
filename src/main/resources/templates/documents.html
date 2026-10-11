@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSON Tool - Мої документи</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -74,57 +75,94 @@
         .button:hover {
             background-color: #0056b3; /* Темніший колір при наведенні */
         }
+
+        button.button {
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .button-secondary {
+            background-color: #6c757d;
+        }
+
+        .button-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        .actions .button {
+            margin-top: 0;
+        }
+
+        .doc-link {
+            font-weight: 500;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .message {
+            border: 1px solid #28a745;
+            background-color: #f0fff0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Мої JSON документи</h1>
 
+    <div th:if="${message}" class="message" th:text="${message}">Повідомлення</div>
+
     <table class="document-table">
         <thead>
         <tr>
             <th>ID</th>
             <th>Назва документа</th>
-            <th>Дата Створення</th>
-            <th>Дії</th>
+            <th>Дата створення</th>
+            <th>Експорт</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="doc : ${documents}">
             <td th:text="${doc.id}">1</td>
-            <td th:text="${doc.name}" style="font-weight: 500;">Test.json</td>
+            <td>
+                <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}" class="doc-link">Test.json</a>
+            </td>
             <td th:text="${#temporals.format(doc.createdAt, 'dd.MM.yyyy HH:mm')}">25.10.2025 10:30</td>
             <td>
                 <a th:href="@{/documents/{id}/export/markdown(id=${doc.id})}"
-                   style="margin-right: 5px; text-decoration: none; color: #007bff;">
-                    [MD]
-                </a>
+                   style="margin-right: 5px; text-decoration: none; color: #007bff;">[MD]</a>
                 <a th:href="@{/documents/{id}/export/txt(id=${doc.id})}"
-                   style="text-decoration: none; color: #28a745;">
-                    [TXT]
-                </a>
+                   style="text-decoration: none; color: #28a745;">[TXT]</a>
             </td>
-            <td>
-                <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}"
-                   style="font-weight: 500; color: #007bff; text-decoration: none;">
-                    Test.json
-                </a>
-            </td>
-
-
+        </tr>
+        <tr th:if="${#lists.isEmpty(documents)}">
+            <td colspan="4" class="empty">Документів поки немає. Створіть перший!</td>
         </tr>
         </tbody>
     </table>
 
-    <div class="container">
-        <h1>Мої JSON документи</h1>
+    <div class="actions">
+        <a th:href="@{/}" class="button button-secondary">На головну</a>
+        <a th:href="@{/documents/new}" class="button">Створити новий документ</a>
 
-        <div style="display: flex; gap: 10px; align-items: center; margin-top: 1.5rem;">
-            <a th:href="@{/documents/new}" class="button">Створити новий документ</a>
-
-            <a th:href="@{/documents/undo}" class="button button-secondary"
-               style="background-color: #6c757d;">Скасувати останнє</a>
-        </div>
+        <form th:action="@{/documents/undo}" method="post" style="margin: 0;">
+            <button type="submit" class="button button-secondary">Скасувати останнє</button>
+        </form>
     </div>
 </div>
 </body>
