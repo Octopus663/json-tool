@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Перегляд документа</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -32,13 +33,17 @@
 
     <p><strong>ID:</strong> <span th:text="${document.id}"></span></p>
     <p><strong>Створено:</strong> <span th:text="${#temporals.format(document.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+    <p><strong>Змінено:</strong> <span th:text="${#temporals.format(document.modifiedAt, 'dd.MM.yyyy HH:mm')}"></span></p>
 
     <h3>Вміст (з підсвіткою Flyweight):</h3>
+    <!-- highlightedContent безпечний: SyntaxHighlighterService екранує весь текст користувача -->
     <div class="code-viewer" th:utext="${highlightedContent}">
         Тут буде кольоровий JSON...
     </div>
 
     <a th:href="@{/documents}" class="button">Назад до списку</a>
+    <a th:href="@{/documents/{id}/export/markdown(id=${document.id})}" class="button">Експорт MD</a>
+    <a th:href="@{/documents/{id}/export/txt(id=${document.id})}" class="button">Експорт TXT</a>
 </div>
 </body>
 </html>
